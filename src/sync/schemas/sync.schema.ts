@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document } from "mongoose";
 
 @Schema()
-export class Sync extends Document {
+export class SyncTransfer extends Document {
 	@Prop({ required: true, unique: true })
 	address: string;
 
@@ -13,4 +13,4 @@ export class Sync extends Document {
 	updatedAt: Date;
 }
 
-export const SyncSchema = SchemaFactory.createForClass(Sync);
+export const SyncTransferSchema = SchemaFactory.createForClass(SyncTransfer);
