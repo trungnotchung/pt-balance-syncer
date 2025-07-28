@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, OnModuleInit } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { SyncTransfer } from "./schemas/sync.schema";
 import { Model } from "mongoose";
@@ -10,7 +10,7 @@ import { Address, parseAbiItem } from "viem";
 const BATCH_SIZE = 1000;
 const INTERVAL_MS = 10_000;
 @Injectable()
-export class SyncService {
+export class SyncService implements OnModuleInit {
 	private syncTimer: NodeJS.Timeout | null = null;
 	private isSyncing: boolean = false;
 
@@ -19,6 +19,10 @@ export class SyncService {
 		private readonly syncModel: Model<SyncTransfer>,
 		private readonly usersService: UsersService
 	) {}
+
+	async onModuleInit() {
+		await this.startSync();
+	}
 
 	async startSync(): Promise<string> {
 		if (this.isSyncing) {
