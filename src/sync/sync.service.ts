@@ -5,7 +5,7 @@ import { Model } from "mongoose";
 import { UsersService } from "src/users/users.service";
 import env from "src/config";
 import { viemClient } from "./provider";
-import { Address, erc20Abi, parseAbiItem } from "viem";
+import { Address, parseAbiItem } from "viem";
 
 const BATCH_SIZE = 1000;
 const INTERVAL_MS = 10_000;
