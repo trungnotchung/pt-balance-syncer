@@ -10,10 +10,10 @@ export class User extends Document {
 	address: string;
 
 	@Prop({
-		type: BigInt,
+		type: String,
 		required: true,
 	})
-	balance: BigInt;
+	balance: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
