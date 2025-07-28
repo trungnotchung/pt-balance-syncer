@@ -6,6 +6,7 @@ export class User extends Document {
 	@Prop({
 		type: String,
 		required: true,
+		unique: true,
 	})
 	address: string;
 

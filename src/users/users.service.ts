@@ -26,20 +26,28 @@ export class UsersService {
 	}
 
 	async getUserBalance(userAddress: string): Promise<ResponseUserDto> {
-		let user = await this.userModel.findOne({ address: userAddress });
+		const user = await this.userModel.findOne({ address: userAddress });
 
 		if (!user) {
-			console.log('User not found, fetching balance from chain');
 			const balance = await this.getUserBalanceOnChain(userAddress);
-			user = new this.userModel({ address: userAddress, balance });
-			await user.save();
-		} else {
-			console.log('User found, returning balance from database');
+			return {
+				address: userAddress,
+				balance: balance
+			}
 		}
-
 		return {
 			address: user.address,
 			balance: user.balance
 		};
+	}
+
+	async updateUserBalance(userAddress: string, amount: bigint, isReceiver: boolean) {
+		let user = await this.userModel.findOne({ address: userAddress });
+		if (!user) {
+			user = await this.userModel.create({ address: userAddress, balance: '0' });
+		}
+
+		user.balance = (isReceiver ? BigInt(user.balance) + amount : BigInt(user.balance) - amount).toString();
+		await user.save();
 	}
 }

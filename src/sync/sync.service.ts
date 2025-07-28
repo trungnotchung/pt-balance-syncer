@@ -7,7 +7,7 @@ import env from "src/config";
 import { viemClient } from "./provider";
 import { Address, erc20Abi, parseAbiItem } from "viem";
 
-const BATCH_SIZE = 10;
+const BATCH_SIZE = 1000;
 const INTERVAL_MS = 10_000;
 @Injectable()
 export class SyncService {
@@ -56,6 +56,8 @@ export class SyncService {
         const from = log.args.from.toLowerCase();
         const to = log.args.to.toLowerCase();
         const value = log.args.value.toString();
+				await this.usersService.updateUserBalance(from, BigInt(value), false);
+				await this.usersService.updateUserBalance(to, BigInt(value), true);
       }
 
       await this.syncModel.updateOne(
@@ -66,7 +68,7 @@ export class SyncService {
         { upsert: true }
       );
 
-			console.log(`Synced blocks ${fromBlock} to ${toBlock}`);
+			console.log(`Synced blocks ${fromBlock} to ${toBlock}, there are ${latestBlock - toBlock} blocks left`);
 
     } catch (err) {
       console.error('Sync job error:', err);
