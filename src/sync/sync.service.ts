@@ -86,4 +86,12 @@ export class SyncService {
       console.error('Sync job error:', err);
     }
   }
+
+	async getSyncStatus(): Promise<string> {
+		const syncStatus = await this.syncModel.findOne({ address: env.contracts.pt.address });
+		if (!this.isSyncing) {
+			return `Sync is not running, last synced block: ${syncStatus ? syncStatus.lastSyncedBlock : '0'}`;
+		}
+		return `Sync is running, last synced block: ${syncStatus ? syncStatus.lastSyncedBlock : '0'}`;
+	}
 }

@@ -14,4 +14,9 @@ export class SyncController {
 	async stopSync() {
 		return await this.syncService.stopSync();
 	}
+
+	@Get('status')
+	async getSyncStatus() {
+		return await this.syncService.getSyncStatus();
+	}
 }
