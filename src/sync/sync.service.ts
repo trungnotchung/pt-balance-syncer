@@ -49,7 +49,7 @@ export class SyncService {
         { upsert: true, new: true }
       );
 
-      const fromBlock = BigInt(status.lastSyncedBlock || 0) + 1n;
+      const fromBlock = status ? BigInt(status.lastSyncedBlock) + 1n : BigInt(env.contracts.pt.deployedBlock);
       const latestBlock = await viemClient.getBlockNumber();
       const toBlock = fromBlock + BigInt(BATCH_SIZE) > latestBlock ? latestBlock : fromBlock + BigInt(BATCH_SIZE);
 			if (fromBlock > toBlock) { // Data is up to date, do nothing
