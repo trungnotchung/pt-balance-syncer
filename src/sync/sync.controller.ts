@@ -9,4 +9,9 @@ export class SyncController {
 	async startSync() {
 		return await this.syncService.startSync();
 	}
+
+	@Post('stop')
+	async stopSync() {
+		return await this.syncService.stopSync();
+	}
 }

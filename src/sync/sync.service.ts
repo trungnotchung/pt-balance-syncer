@@ -11,6 +11,7 @@ const BATCH_SIZE = 1000;
 const INTERVAL_MS = 10_000;
 @Injectable()
 export class SyncService {
+	private syncTimer: NodeJS.Timeout | null = null;
 	private isSyncing: boolean = false;
 
 	constructor(
@@ -24,10 +25,20 @@ export class SyncService {
 			return 'Sync is already running';
 		}
 		this.isSyncing = true;
-		setInterval(async () => {
+		this.syncTimer = setInterval(async () => {
 				await this.syncNewTransferEvents();
 		}, INTERVAL_MS).unref();
 		return 'Sync started successfully';
+	}
+
+	async stopSync(): Promise<string> {
+		if (!this.syncTimer) {
+			return 'Sync is not running';
+		}
+		clearInterval(this.syncTimer);
+		this.syncTimer = null;
+		this.isSyncing = false;
+		return 'Sync stopped successfully';
 	}
 
 	private async syncNewTransferEvents() {
@@ -56,6 +67,7 @@ export class SyncService {
         const from = log.args.from.toLowerCase();
         const to = log.args.to.toLowerCase();
         const value = log.args.value.toString();
+				console.log(`Transferring ${value} from ${from} to ${to}`);
 				await this.usersService.updateUserBalance(from, BigInt(value), false);
 				await this.usersService.updateUserBalance(to, BigInt(value), true);
       }
