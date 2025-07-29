@@ -23,13 +23,17 @@ export class UserAccountProvider {
     private readonly hashingProvider: HashingProvider,
   ) {}
 
+  public async findUserByUsername(
+    username: string,
+  ): Promise<UserAccount | undefined> {
+    return this.userAccountModel.findOne({ username });
+  }
+
   public async createUser(createUserDto: CreateUserDto): Promise<UserAccount> {
     try {
-      let existingUser = undefined;
-
-      existingUser = await this.userAccountModel.findOne({
-        username: createUserDto.username,
-      });
+      const existingUser = await this.findUserByUsername(
+        createUserDto.username,
+      );
 
       // Handle exception
       if (existingUser) {

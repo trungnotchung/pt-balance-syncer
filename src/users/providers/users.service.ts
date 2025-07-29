@@ -33,4 +33,8 @@ export class UsersService {
   async createUser(createUserDto: CreateUserDto): Promise<UserAccount> {
     return this.userAccountProvider.createUser(createUserDto);
   }
+
+  async findUserByUsername(username: string): Promise<UserAccount | undefined> {
+    return this.userAccountProvider.findUserByUsername(username);
+  }
 }

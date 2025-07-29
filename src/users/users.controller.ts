@@ -22,7 +22,7 @@ export class UsersController {
     return user;
   }
 
-  @Post('signup')
+  @Post('sign-up')
   async signup(
     @Body(new ValidationPipe()) createUserDto: CreateUserDto,
   ): Promise<UserAccount> {
