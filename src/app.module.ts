@@ -1,8 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
 import env from './config';
 import { SyncModule } from './sync/sync.module';
 import { UsersModule } from './users/users.module';
@@ -14,8 +13,9 @@ import { UsersModule } from './users/users.module';
     }),
     UsersModule,
     SyncModule,
+    AuthModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
