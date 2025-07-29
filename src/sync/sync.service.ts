@@ -49,22 +49,32 @@ export class SyncService implements OnModuleInit {
 
   private async syncNewTransferEvents() {
     try {
-      const status = await this.syncModel.findOneAndUpdate(
-        { address: env.contracts.pt.address },
-        {},
-        { upsert: true, new: true },
-      );
+      const status = await this.syncModel.findOne({
+        address: env.contracts.pt.address,
+      });
 
-      const fromBlock = status
-        ? BigInt(status.lastSyncedBlock) + 1n
-        : BigInt(env.contracts.pt.deployedBlock);
+      let fromBlock: bigint;
+
+      if (!status) {
+        // No document exists, create one and use deployed block
+        await this.syncModel.create({
+          address: env.contracts.pt.address,
+          lastSyncedBlock: env.contracts.pt.deployedBlock.toString(),
+          updatedAt: new Date(),
+        });
+        fromBlock = BigInt(env.contracts.pt.deployedBlock);
+      } else {
+        // Document exists, use its lastSyncedBlock + 1
+        fromBlock = BigInt(status.lastSyncedBlock) + 1n;
+      }
+
       const latestBlock = await viemClient.getBlockNumber();
       const toBlock =
         fromBlock + BigInt(BATCH_SIZE) > latestBlock
           ? latestBlock
           : fromBlock + BigInt(BATCH_SIZE);
+
       if (fromBlock > toBlock) {
-        // Data is up to date, do nothing
         return;
       }
 
