@@ -1,48 +1,14 @@
-import {
-  forwardRef,
-  Inject,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
-
-import { UsersService } from 'src/users/providers/users.service';
+import { Injectable } from '@nestjs/common';
 
 import { SignInDto } from '../dtos/signin.dto';
 
-import { HashingProvider } from './hashing.provider';
+import { SignInProvider } from './sign-in.provider';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    @Inject(forwardRef(() => UsersService))
-    private readonly usersService: UsersService,
-    @Inject(forwardRef(() => HashingProvider))
-    private readonly hashingProvider: HashingProvider,
-  ) {}
+  constructor(private readonly signInProvider: SignInProvider) {}
 
   async signIn(signInDto: SignInDto): Promise<string> {
-    try {
-      const user = await this.usersService.findUserByUsername(
-        signInDto.username,
-      );
-
-      if (!user) {
-        throw new UnauthorizedException('User not found');
-      }
-
-      const isPasswordValid = await this.hashingProvider.comparePassword(
-        signInDto.password,
-        user.password,
-      );
-
-      if (!isPasswordValid) {
-        throw new UnauthorizedException('Invalid password');
-      }
-
-      return `Login successful for ${user.username}`;
-    } catch (error) {
-      console.log(`Error signing in: ${error}`);
-      throw error;
-    }
+    return this.signInProvider.signIn(signInDto);
   }
 }

@@ -2,14 +2,14 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { AuthModule } from './auth/auth.module';
-import env from './config';
+import { databaseConfig } from './config';
 import { SyncModule } from './sync/sync.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
-    MongooseModule.forRoot(env.db.url, {
-      dbName: 'pt-balance',
+    MongooseModule.forRoot(databaseConfig().url, {
+      dbName: databaseConfig().databaseName,
     }),
     UsersModule,
     SyncModule,

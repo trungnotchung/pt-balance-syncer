@@ -38,7 +38,7 @@ export class UserAccountProvider {
       // Handle exception
       if (existingUser) {
         throw new BadRequestException(
-          'The user already exists, please check your email.',
+          'The user already exists, please try another username.',
         );
       }
 

@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Address, parseAbiItem } from 'viem';
 
-import env from 'src/config';
+import { contractsConfig } from 'src/config';
 import { UsersService } from 'src/users/providers/users.service';
 
 import { viemClient } from './provider';
@@ -50,7 +50,7 @@ export class SyncService implements OnModuleInit {
   private async syncNewTransferEvents() {
     try {
       const status = await this.syncModel.findOne({
-        address: env.contracts.pt.address,
+        address: contractsConfig().pt.address,
       });
 
       let fromBlock: bigint;
@@ -58,11 +58,11 @@ export class SyncService implements OnModuleInit {
       if (!status) {
         // No document exists, create one and use deployed block
         await this.syncModel.create({
-          address: env.contracts.pt.address,
-          lastSyncedBlock: env.contracts.pt.deployedBlock.toString(),
+          address: contractsConfig().pt.address,
+          lastSyncedBlock: contractsConfig().pt.deployedBlock.toString(),
           updatedAt: new Date(),
         });
-        fromBlock = BigInt(env.contracts.pt.deployedBlock);
+        fromBlock = BigInt(contractsConfig().pt.deployedBlock);
       } else {
         // Document exists, use its lastSyncedBlock + 1
         fromBlock = BigInt(status.lastSyncedBlock) + 1n;
@@ -79,7 +79,7 @@ export class SyncService implements OnModuleInit {
       }
 
       const logs = await viemClient.getLogs({
-        address: env.contracts.pt.address as Address,
+        address: contractsConfig().pt.address as Address,
         event: parseAbiItem(
           'event Transfer(address indexed from, address indexed to, uint256 value)',
         ),
@@ -97,7 +97,7 @@ export class SyncService implements OnModuleInit {
       }
 
       await this.syncModel.updateOne(
-        { address: env.contracts.pt.address },
+        { address: contractsConfig().pt.address },
         {
           $set: {
             lastSyncedBlock: Number(toBlock),
@@ -117,7 +117,7 @@ export class SyncService implements OnModuleInit {
 
   async getSyncStatus(): Promise<string> {
     const syncStatus = await this.syncModel.findOne({
-      address: env.contracts.pt.address,
+      address: contractsConfig().pt.address,
     });
     if (!this.isSyncing) {
       return `Sync is not running, last synced block: ${syncStatus ? syncStatus.lastSyncedBlock : '0'}`;

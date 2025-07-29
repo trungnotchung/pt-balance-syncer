@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Address, erc20Abi, formatUnits } from 'viem';
 
-import env from 'src/config';
+import { contractsConfig } from 'src/config';
 import { viemClient } from 'src/sync/provider';
 
 import { ResponseUserDto } from '../dtos/response-user.dto';
@@ -18,7 +18,7 @@ export class UserBalanceProvider {
 
   private async getUserBalanceOnChain(userAddress: string): Promise<string> {
     const rawBalance = await viemClient.readContract({
-      address: env.contracts.pt.address as Address,
+      address: contractsConfig().pt.address as Address,
       abi: erc20Abi,
       functionName: 'balanceOf',
       args: [userAddress as Address],
