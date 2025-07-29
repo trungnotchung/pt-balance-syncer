@@ -13,7 +13,7 @@ import { UserBalance } from '../schemas/user-balance.schema';
 export class UserBalanceProvider {
   constructor(
     @InjectModel(UserBalance.name)
-    private readonly userModel: Model<UserBalance>,
+    private readonly userBalanceModel: Model<UserBalance>,
   ) {}
 
   private async getUserBalanceOnChain(userAddress: string): Promise<string> {
@@ -28,7 +28,7 @@ export class UserBalanceProvider {
   }
 
   async getUserBalance(userAddress: string): Promise<ResponseUserDto> {
-    const user = await this.userModel.findOne({ address: userAddress });
+    const user = await this.userBalanceModel.findOne({ address: userAddress });
 
     if (!user) {
       const balance = await this.getUserBalanceOnChain(userAddress);
@@ -48,9 +48,9 @@ export class UserBalanceProvider {
     amount: bigint,
     isReceiver: boolean,
   ) {
-    let user = await this.userModel.findOne({ address: userAddress });
+    let user = await this.userBalanceModel.findOne({ address: userAddress });
     if (!user) {
-      user = await this.userModel.create({
+      user = await this.userBalanceModel.create({
         address: userAddress,
         balance: '0',
       });

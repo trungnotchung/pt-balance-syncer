@@ -1,12 +1,18 @@
 import { Injectable } from '@nestjs/common';
 
+import { CreateUserDto } from '../dtos/create-user.dto';
 import { ResponseUserDto } from '../dtos/response-user.dto';
+import { UserAccount } from '../schemas/user-account.schema';
 
+import { UserAccountProvider } from './users-account.provider';
 import { UserBalanceProvider } from './users-balance.provider';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly userBalanceProvider: UserBalanceProvider) {}
+  constructor(
+    private readonly userBalanceProvider: UserBalanceProvider,
+    private readonly userAccountProvider: UserAccountProvider,
+  ) {}
 
   async getUserBalance(userAddress: string): Promise<ResponseUserDto> {
     return this.userBalanceProvider.getUserBalance(userAddress);
@@ -22,5 +28,9 @@ export class UsersService {
       amount,
       isReceiver,
     );
+  }
+
+  async createUser(createUserDto: CreateUserDto): Promise<UserAccount> {
+    return this.userAccountProvider.createUser(createUserDto);
   }
 }

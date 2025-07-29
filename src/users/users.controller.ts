@@ -1,7 +1,16 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  ValidationPipe,
+} from '@nestjs/common';
 
+import { CreateUserDto } from './dtos/create-user.dto';
 import { ResponseUserDto } from './dtos/response-user.dto';
 import { UsersService } from './providers/users.service';
+import { UserAccount } from './schemas/user-account.schema';
 
 @Controller('users')
 export class UsersController {
@@ -10,6 +19,14 @@ export class UsersController {
   @Get(':address')
   async getUser(@Param('address') address: string): Promise<ResponseUserDto> {
     const user = await this.usersService.getUserBalance(address);
+    return user;
+  }
+
+  @Post('signup')
+  async signup(
+    @Body(new ValidationPipe()) createUserDto: CreateUserDto,
+  ): Promise<UserAccount> {
+    const user = await this.usersService.createUser(createUserDto);
     return user;
   }
 }
