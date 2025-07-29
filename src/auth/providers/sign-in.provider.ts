@@ -4,7 +4,10 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigType } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 
+import { jwtConfig } from 'src/config';
 import { UsersService } from 'src/users/providers/users.service';
 
 import { SignInDto } from '../dtos/signin.dto';
@@ -18,6 +21,9 @@ export class SignInProvider {
     private readonly usersService: UsersService,
     @Inject(forwardRef(() => HashingProvider))
     private readonly hashingProvider: HashingProvider,
+    private readonly jwtService: JwtService,
+    @Inject(jwtConfig.KEY)
+    private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
   ) {}
 
   async signIn(signInDto: SignInDto): Promise<string> {
@@ -39,7 +45,20 @@ export class SignInProvider {
         throw new UnauthorizedException('Invalid password');
       }
 
-      return `Login successful for ${user.username}`;
+      const accessToken = await this.jwtService.signAsync(
+        {
+          sub: user.id,
+          username: user.username,
+        },
+        {
+          audience: this.jwtConfiguration.audience,
+          issuer: this.jwtConfiguration.issuer,
+          secret: this.jwtConfiguration.secret,
+          expiresIn: this.jwtConfiguration.accessTokenTtl,
+        },
+      );
+
+      return accessToken;
     } catch (error) {
       console.log(`Error signing in: ${error}`);
       throw error;
