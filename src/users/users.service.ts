@@ -7,13 +7,13 @@ import env from 'src/config';
 import { viemClient } from 'src/sync/provider';
 
 import { ResponseUserDto } from './dtos/response-user.dto';
-import { User } from './schemas/user.schema';
+import { UserBalance } from './schemas/user-balance.schema';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectModel(User.name)
-    private readonly userModel: Model<User>,
+    @InjectModel(UserBalance.name)
+    private readonly userModel: Model<UserBalance>,
   ) {}
 
   private async getUserBalanceOnChain(userAddress: string): Promise<string> {
