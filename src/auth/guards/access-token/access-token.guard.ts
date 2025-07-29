@@ -11,13 +11,16 @@ import { Request } from 'express';
 
 import { REQUEST_USER_KEY } from 'src/auth/constants/auth.constant';
 import { jwtConfig } from 'src/config';
+import { UserRole } from 'src/users/constants/user.constant';
+import { UsersService } from 'src/users/providers/users.service';
 
 @Injectable()
-export class AccessTokenGuard implements CanActivate {
+export class AdminGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
     @Inject(jwtConfig.KEY)
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
+    private readonly usersService: UsersService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -30,16 +33,20 @@ export class AccessTokenGuard implements CanActivate {
       throw new UnauthorizedException();
     }
 
-    try {
-      const payload = await this.jwtService.verifyAsync(
-        token,
-        this.jwtConfiguration,
+    const payload = await this.jwtService.verifyAsync(
+      token,
+      this.jwtConfiguration,
+    );
+
+    const user = await this.usersService.findUserByUsername(payload.username);
+    if (!user || user.role !== UserRole.ADMIN) {
+      throw new UnauthorizedException(
+        `User ${payload.username} does not have permission to access this resource`,
       );
-      request[REQUEST_USER_KEY] = payload;
-      console.log(payload);
-    } catch (_) {
-      throw new UnauthorizedException();
     }
+
+    request[REQUEST_USER_KEY] = user;
+
     return true;
   }
 
