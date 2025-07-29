@@ -6,11 +6,11 @@ import { Address, erc20Abi, formatUnits } from 'viem';
 import env from 'src/config';
 import { viemClient } from 'src/sync/provider';
 
-import { ResponseUserDto } from './dtos/response-user.dto';
-import { UserBalance } from './schemas/user-balance.schema';
+import { ResponseUserDto } from '../dtos/response-user.dto';
+import { UserBalance } from '../schemas/user-balance.schema';
 
 @Injectable()
-export class UsersService {
+export class UserBalanceProvider {
   constructor(
     @InjectModel(UserBalance.name)
     private readonly userModel: Model<UserBalance>,

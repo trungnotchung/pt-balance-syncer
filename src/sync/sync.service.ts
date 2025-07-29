@@ -4,7 +4,7 @@ import { Model } from 'mongoose';
 import { Address, parseAbiItem } from 'viem';
 
 import env from 'src/config';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from 'src/users/providers/users.service';
 
 import { viemClient } from './provider';
 import { SyncTransfer } from './schemas/sync.schema';
