@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 
+import { AddressParamsDto } from './dtos/address-params.dto';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { ResponseUserDto } from './dtos/response-user.dto';
 import { UsersService } from './providers/users.service';
@@ -10,8 +11,8 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get(':address')
-  async getUser(@Param('address') address: string): Promise<ResponseUserDto> {
-    const user = await this.usersService.getUserBalance(address);
+  async getUser(@Param() params: AddressParamsDto): Promise<ResponseUserDto> {
+    const user = await this.usersService.getUserBalance(params.address);
     return user;
   }
 
