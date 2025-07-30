@@ -17,19 +17,20 @@ export class SyncResponseDto {
 
   @ApiProperty({
     description: 'The current last synced block',
-    example: 12345678,
+    example: '12345678',
   })
-  lastSyncedBlock: number;
+  lastSyncedBlock: string;
 
   @ApiProperty({
     description: 'The number of blocks remaining to be synced',
-    example: 100,
+    example: '100',
   })
-  blocksRemaining: number;
+  blocksRemaining: string;
 
   @ApiProperty({
-    description: 'The number of blocks remaining to be synced',
-    example: 100,
+    description: 'The sync status',
+    example: SyncStatus.SYNCING,
+    enum: SyncStatus,
   })
   status: SyncStatus;
 }
