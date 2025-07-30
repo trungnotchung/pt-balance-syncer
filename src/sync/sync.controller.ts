@@ -5,7 +5,7 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import { RoleGuard } from 'src/auth/guards/access-token/roles.guard';
 import { UserRole } from 'src/users/constants/user.constant';
 
-import { SyncService } from './sync.service';
+import { SyncService } from './providers/sync.service';
 
 @Controller('sync')
 export class SyncController {

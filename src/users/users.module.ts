@@ -2,6 +2,7 @@ import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { AuthModule } from 'src/auth/auth.module';
+import { OnchainModule } from 'src/onchain/onchain.module';
 
 import { UserAccountProvider } from './providers/users-account.provider';
 import { UserBalanceProvider } from './providers/users-balance.provider';
@@ -23,6 +24,7 @@ import { UsersController } from './users.controller';
       },
     ]),
     forwardRef(() => AuthModule),
+    OnchainModule,
   ],
   controllers: [UsersController],
   providers: [UsersService, UserBalanceProvider, UserAccountProvider],

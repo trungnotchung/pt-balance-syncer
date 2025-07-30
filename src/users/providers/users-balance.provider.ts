@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Address, erc20Abi, formatUnits } from 'viem';
 
 import { contractsConfig } from 'src/config';
-import { viemClient } from 'src/sync/provider';
+import { OnchainService } from 'src/onchain/onchain.service';
 
 import { ResponseUserDto } from '../dtos/response-user.dto';
 import { UserBalance } from '../schemas/user-balance.schema';
@@ -14,24 +13,17 @@ export class UserBalanceProvider {
   constructor(
     @InjectModel(UserBalance.name)
     private readonly userBalanceModel: Model<UserBalance>,
+    private readonly onchainService: OnchainService,
   ) {}
-
-  private async getUserBalanceOnChain(userAddress: string): Promise<string> {
-    const rawBalance = await viemClient.readContract({
-      address: contractsConfig().pt.address as Address,
-      abi: erc20Abi,
-      functionName: 'balanceOf',
-      args: [userAddress as Address],
-    });
-
-    return formatUnits(rawBalance, 18);
-  }
 
   async getUserBalance(userAddress: string): Promise<ResponseUserDto> {
     const user = await this.userBalanceModel.findOne({ address: userAddress });
 
     if (!user) {
-      const balance = await this.getUserBalanceOnChain(userAddress);
+      const balance = await this.onchainService.getUserBalanceOnChain(
+        contractsConfig().pt.address,
+        userAddress,
+      );
       return {
         address: userAddress,
         balance: balance,
