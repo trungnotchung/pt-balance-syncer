@@ -4,11 +4,9 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
 import { JwtPayload } from 'src/auth/constants/jwt-payload.constant';
-import { jwtConfig } from 'src/config';
 import { UsersService } from 'src/users/providers/users.service';
 
 import { SignInDto } from '../dtos/signin.dto';
@@ -23,8 +21,6 @@ export class SignInProvider {
     @Inject(forwardRef(() => HashingProvider))
     private readonly hashingProvider: HashingProvider,
     private readonly jwtService: JwtService,
-    @Inject(jwtConfig.KEY)
-    private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
   ) {}
 
   async signIn(signInDto: SignInDto): Promise<string> {
@@ -52,12 +48,7 @@ export class SignInProvider {
         role: user.role,
       };
 
-      const accessToken = await this.jwtService.signAsync(payload, {
-        audience: this.jwtConfiguration.audience,
-        issuer: this.jwtConfiguration.issuer,
-        secret: this.jwtConfiguration.secret,
-        expiresIn: this.jwtConfiguration.accessTokenTtl,
-      });
+      const accessToken = await this.jwtService.signAsync(payload);
 
       return accessToken;
     } catch (error) {

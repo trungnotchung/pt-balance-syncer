@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { AuthModule } from './auth/auth.module';
@@ -24,6 +25,10 @@ import { UsersModule } from './users/users.module';
         contractsConfig,
         jwtConfig,
       ],
+    }),
+    JwtModule.registerAsync({
+      global: true,
+      ...jwtConfig.asProvider(),
     }),
     MongooseModule.forRoot(databaseConfig().url, {
       dbName: databaseConfig().databaseName,

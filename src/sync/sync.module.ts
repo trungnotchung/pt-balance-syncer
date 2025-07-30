@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { UsersModule } from 'src/users/users.module';
@@ -15,20 +13,6 @@ import { SyncService } from './sync.service';
       { name: SyncTransfer.name, schema: SyncTransferSchema },
     ]),
     UsersModule,
-    JwtModule.registerAsync({
-      useFactory: (configService: ConfigService) => {
-        const jwtConfig = configService.get('jwt');
-        return {
-          secret: jwtConfig.secret,
-          signOptions: {
-            audience: jwtConfig.audience,
-            issuer: jwtConfig.issuer,
-            expiresIn: jwtConfig.accessTokenTtl,
-          },
-        };
-      },
-      inject: [ConfigService],
-    }),
   ],
   controllers: [SyncController],
   providers: [SyncService],
