@@ -4,9 +4,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { OnchainModule } from 'src/onchain/onchain.module';
 import { UsersModule } from 'src/users/users.module';
 
-import { SyncService } from './providers/sync.service';
 import { SyncTransfer, SyncTransferSchema } from './schemas/sync.schema';
 import { SyncController } from './sync.controller';
+import { SyncService } from './sync.service';
 
 @Module({
   imports: [
