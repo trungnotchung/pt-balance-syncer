@@ -7,6 +7,7 @@ import {
 import { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
+import { JwtPayload } from 'src/auth/constants/jwt-payload.constant';
 import { jwtConfig } from 'src/config';
 import { UsersService } from 'src/users/providers/users.service';
 
@@ -45,18 +46,18 @@ export class SignInProvider {
         throw new UnauthorizedException('Invalid password');
       }
 
-      const accessToken = await this.jwtService.signAsync(
-        {
-          sub: user.id,
-          username: user.username,
-        },
-        {
-          audience: this.jwtConfiguration.audience,
-          issuer: this.jwtConfiguration.issuer,
-          secret: this.jwtConfiguration.secret,
-          expiresIn: this.jwtConfiguration.accessTokenTtl,
-        },
-      );
+      const payload: JwtPayload = {
+        sub: user.id,
+        username: user.username,
+        role: user.role,
+      };
+
+      const accessToken = await this.jwtService.signAsync(payload, {
+        audience: this.jwtConfiguration.audience,
+        issuer: this.jwtConfiguration.issuer,
+        secret: this.jwtConfiguration.secret,
+        expiresIn: this.jwtConfiguration.accessTokenTtl,
+      });
 
       return accessToken;
     } catch (error) {

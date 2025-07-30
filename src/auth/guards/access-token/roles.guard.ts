@@ -6,21 +6,22 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
+import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 
 import { REQUEST_USER_KEY } from 'src/auth/constants/auth.constant';
+import { JwtPayload } from 'src/auth/constants/jwt-payload.constant';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 import { jwtConfig } from 'src/config';
-import { UserRole } from 'src/users/constants/user.constant';
-import { UsersService } from 'src/users/providers/users.service';
 
 @Injectable()
-export class AdminGuard implements CanActivate {
+export class RoleGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
     @Inject(jwtConfig.KEY)
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
-    private readonly usersService: UsersService,
+    private readonly reflector: Reflector,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -32,21 +33,17 @@ export class AdminGuard implements CanActivate {
     if (!token) {
       throw new UnauthorizedException();
     }
-
-    const payload = await this.jwtService.verifyAsync(
+    const payload: JwtPayload = await this.jwtService.verifyAsync(
       token,
       this.jwtConfiguration,
     );
-
-    const user = await this.usersService.findUserByUsername(payload.username);
-    if (!user || user.role !== UserRole.ADMIN) {
+    const roles = this.reflector.get(Roles, context.getHandler());
+    if (!roles.includes(payload.role)) {
       throw new UnauthorizedException(
         `User ${payload.username} does not have permission to access this resource`,
       );
     }
-
-    request[REQUEST_USER_KEY] = user;
-
+    request[REQUEST_USER_KEY] = payload;
     return true;
   }
 
