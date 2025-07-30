@@ -47,16 +47,6 @@ export class SyncService implements OnModuleInit {
         return `Sync is already running for address ${address}`;
       }
 
-      // Validate address
-      if (!address || !address.match(/^0x[a-fA-F0-9]{40}$/)) {
-        throw new Error('Invalid Ethereum address format');
-      }
-
-      // Validate fromBlock if provided
-      if (fromBlock && isNaN(Number(fromBlock))) {
-        throw new Error('Invalid fromBlock: must be a valid number');
-      }
-
       const syncStatus = await this.syncModel.findOneAndUpdate(
         { address },
         {
