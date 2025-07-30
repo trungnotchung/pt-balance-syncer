@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from 'src/auth/constants/jwt-payload.constant';
 import { UsersService } from 'src/users/providers/users.service';
 
+import { SignInResponseDto } from '../dtos/signin-response.dto';
 import { SignInDto } from '../dtos/signin.dto';
 
 import { HashingProvider } from './hashing.provider';
@@ -23,7 +24,7 @@ export class SignInProvider {
     private readonly jwtService: JwtService,
   ) {}
 
-  async signIn(signInDto: SignInDto): Promise<string> {
+  async signIn(signInDto: SignInDto): Promise<SignInResponseDto> {
     try {
       const user = await this.usersService.findUserByUsername(
         signInDto.username,
@@ -50,7 +51,12 @@ export class SignInProvider {
 
       const accessToken = await this.jwtService.signAsync(payload);
 
-      return accessToken;
+      return {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+        accessToken,
+      };
     } catch (error) {
       console.log(`Error signing in: ${error}`);
       throw error;
