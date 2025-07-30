@@ -4,6 +4,7 @@ import {
   ApiBody,
   ApiOperation,
   ApiParam,
+  ApiResponse,
 } from '@nestjs/swagger';
 
 import { Roles } from 'src/auth/decorators/roles.decorator';
@@ -59,6 +60,34 @@ export class SyncController {
     name: 'address',
     description: 'The address of the PT contract',
     example: '0x9f56094c450763769ba0ea9fe2876070c0fd5f77',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Sync status retrieved successfully',
+    type: SyncResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Sync status not found for the given address',
+    schema: {
+      example: {
+        statusCode: 404,
+        message:
+          'Sync status not found for address 0x1234567890abcdef1234567890abcdef12345678',
+        error: 'Not Found',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error',
+    schema: {
+      example: {
+        statusCode: 500,
+        message: 'Failed to retrieve sync status',
+        error: 'Internal Server Error',
+      },
+    },
   })
   @Get('status/:address')
   async getSyncStatus(
