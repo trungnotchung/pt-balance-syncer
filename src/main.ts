@@ -12,6 +12,17 @@ async function bootstrap() {
     .setTitle('PT Balance API')
     .setDescription('The PT Balance API description')
     .setVersion('0.1')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description: 'Enter JWT token',
+      },
+      'bearer',
+    )
+
+    .addTag('Authentication', 'User registration, login, and nonce generation')
     .build();
 
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
