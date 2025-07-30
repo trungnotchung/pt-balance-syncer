@@ -13,7 +13,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @ApiOperation({
-    summary: 'Get user by wallet address',
+    summary: 'Get user balance by wallet address',
     description:
       'Fetch the user balance and profile information for a given Ethereum address.',
   })
@@ -22,8 +22,10 @@ export class UsersController {
     description: 'Ethereum wallet address (0x-prefixed, 40 hex chars)',
     example: '0x1234567890abcdef1234567890abcdef12345678',
   })
-  @Get(':address')
-  async getUser(@Param() params: AddressParamsDto): Promise<ResponseUserDto> {
+  @Get('balance/:address')
+  async getUserBalance(
+    @Param() params: AddressParamsDto,
+  ): Promise<ResponseUserDto> {
     const user = await this.usersService.getUserBalance(params.address);
     return user;
   }
