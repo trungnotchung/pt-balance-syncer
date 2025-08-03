@@ -30,10 +30,13 @@ export class SyncController {
   @ApiBody({ type: StartSyncDto })
   @Post('start')
   async startSync(@Body() startSyncDto: StartSyncDto) {
-    return await this.syncService.startSync(
+    await this.syncService.startSync(
       startSyncDto.address,
       startSyncDto.fromBlock,
     );
+    return {
+      message: 'Sync started successfully',
+    };
   }
 
   @ApiBearerAuth('bearer')
@@ -46,7 +49,10 @@ export class SyncController {
   @ApiBody({ type: AddressParamsDto })
   @Post('stop')
   async stopSync(@Body() stopSyncDto: AddressParamsDto) {
-    return await this.syncService.stopSync(stopSyncDto.address);
+    await this.syncService.stopSync(stopSyncDto.address);
+    return {
+      message: 'Sync stopped successfully',
+    };
   }
 
   @ApiBearerAuth('bearer')

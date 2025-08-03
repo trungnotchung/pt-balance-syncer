@@ -4,6 +4,7 @@ import {
   NotFoundException,
   InternalServerErrorException,
   Logger,
+  ConflictException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -40,16 +41,19 @@ export class SyncService implements OnModuleInit {
       );
     } catch (error) {
       this.logger.error('Failed to start sync on module init:', error);
+      throw new InternalServerErrorException(
+        `Failed to start sync for ${contractsConfig().pt.address}`,
+      );
     }
   }
 
-  async startSync(address: string, fromBlock?: string): Promise<string> {
-    try {
-      if (this.syncMap.has(address)) {
-        this.logger.warn(`Sync is already running for address ${address}`);
-        return `Sync is already running for address ${address}`;
-      }
+  async startSync(address: string, fromBlock?: string): Promise<void> {
+    if (this.syncMap.has(address)) {
+      this.logger.warn(`Sync is already running for address ${address}`);
+      throw new ConflictException(`Sync already running`);
+    }
 
+    try {
       const syncStatus = await this.syncModel.findOneAndUpdate(
         { address },
         {
@@ -75,20 +79,20 @@ export class SyncService implements OnModuleInit {
       );
 
       this.logger.log(`Sync started successfully for address ${address}`);
-      return `Sync started successfully for address ${address}`;
     } catch (error) {
-      this.logger.error(`Failed to start sync for address ${address}:`, error);
-      throw new Error(`Failed to start sync: ${error.message}`);
+      this.logger.error(`Unable to start sync for ${address}`, error.stack);
+      throw new InternalServerErrorException(
+        `Failed to start sync for ${address}`,
+      );
     }
   }
 
-  async stopSync(address: string): Promise<string> {
+  async stopSync(address: string): Promise<void> {
+    if (!this.syncMap.has(address)) {
+      this.logger.warn(`Sync is not running for address ${address}`);
+      throw new ConflictException(`Sync not running`);
+    }
     try {
-      if (!this.syncMap.has(address)) {
-        this.logger.warn(`Sync is not running for address ${address}`);
-        return `Sync is not running for address ${address}`;
-      }
-
       await this.syncModel.findOneAndUpdate(
         { address },
         {
@@ -105,10 +109,11 @@ export class SyncService implements OnModuleInit {
       }
       this.syncMap.delete(address);
       this.logger.log(`Sync stopped successfully for address ${address}`);
-      return `Sync stopped successfully for address ${address}`;
     } catch (error) {
       this.logger.error(`Failed to stop sync for address ${address}:`, error);
-      throw new Error(`Failed to stop sync: ${error.message}`);
+      throw new InternalServerErrorException(
+        `Failed to stop sync for ${address}`,
+      );
     }
   }
 
@@ -182,7 +187,10 @@ export class SyncService implements OnModuleInit {
         `Address ${address} synced ${logs.length} logs from block ${fromBlock} to ${toBlock}`,
       );
     } catch (error) {
-      this.logger.error(`Sync job error for address ${address}:`, error);
+      this.logger.error(
+        `Sync job for address ${address} failed: ${error.message}`,
+        error.stack,
+      );
     }
   }
 
