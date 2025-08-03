@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsOptional, IsString, Matches } from 'class-validator';
+import { IsOptional, IsString, Matches } from 'class-validator';
 
 export class StartSyncDto {
   @ApiProperty({
@@ -16,7 +16,7 @@ export class StartSyncDto {
     description: 'The block number to start syncing from',
     example: 1234567890,
   })
-  @IsNumber()
+  @IsString()
   @IsOptional()
   fromBlock?: string;
 }
