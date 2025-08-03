@@ -2,6 +2,7 @@ import {
   forwardRef,
   Inject,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -16,6 +17,8 @@ import { HashingProvider } from './hashing.provider';
 
 @Injectable()
 export class SignInProvider {
+  private readonly logger = new Logger(SignInProvider.name);
+
   constructor(
     @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
@@ -58,7 +61,7 @@ export class SignInProvider {
         accessToken,
       };
     } catch (error) {
-      console.log(`Error signing in: ${error}`);
+      this.logger.error(`Error signing in: ${error}`);
       throw error;
     }
   }

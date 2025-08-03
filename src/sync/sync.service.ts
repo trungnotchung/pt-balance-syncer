@@ -3,6 +3,7 @@ import {
   OnModuleInit,
   NotFoundException,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -22,6 +23,7 @@ const INTERVAL_MS = 10_000;
 @Injectable()
 export class SyncService implements OnModuleInit {
   private syncMap: Map<string, NodeJS.Timeout | null> = new Map();
+  private readonly logger = new Logger(SyncService.name);
 
   constructor(
     @InjectModel(SyncTransfer.name)
@@ -37,13 +39,14 @@ export class SyncService implements OnModuleInit {
         contractsConfig().pt.deployedBlock.toString(),
       );
     } catch (error) {
-      console.error('Failed to start sync on module init:', error);
+      this.logger.error('Failed to start sync on module init:', error);
     }
   }
 
   async startSync(address: string, fromBlock?: string): Promise<string> {
     try {
       if (this.syncMap.has(address)) {
+        this.logger.warn(`Sync is already running for address ${address}`);
         return `Sync is already running for address ${address}`;
       }
 
@@ -71,9 +74,10 @@ export class SyncService implements OnModuleInit {
         }, INTERVAL_MS).unref(),
       );
 
+      this.logger.log(`Sync started successfully for address ${address}`);
       return `Sync started successfully for address ${address}`;
     } catch (error) {
-      console.error(`Failed to start sync for address ${address}:`, error);
+      this.logger.error(`Failed to start sync for address ${address}:`, error);
       throw new Error(`Failed to start sync: ${error.message}`);
     }
   }
@@ -81,6 +85,7 @@ export class SyncService implements OnModuleInit {
   async stopSync(address: string): Promise<string> {
     try {
       if (!this.syncMap.has(address)) {
+        this.logger.warn(`Sync is not running for address ${address}`);
         return `Sync is not running for address ${address}`;
       }
 
@@ -99,10 +104,10 @@ export class SyncService implements OnModuleInit {
         clearInterval(timer);
       }
       this.syncMap.delete(address);
-
+      this.logger.log(`Sync stopped successfully for address ${address}`);
       return `Sync stopped successfully for address ${address}`;
     } catch (error) {
-      console.error(`Failed to stop sync for address ${address}:`, error);
+      this.logger.error(`Failed to stop sync for address ${address}:`, error);
       throw new Error(`Failed to stop sync: ${error.message}`);
     }
   }
@@ -111,7 +116,7 @@ export class SyncService implements OnModuleInit {
     try {
       const status = await this.syncModel.findOne({ address });
       if (!status) {
-        console.error(`Sync status not found for address ${address}`);
+        this.logger.error(`Sync status not found for address ${address}`);
         return;
       }
 
@@ -145,15 +150,20 @@ export class SyncService implements OnModuleInit {
           const value = log.args?.value?.toString();
 
           if (!from || !to || !value) {
-            console.warn('Invalid log data:', log);
+            this.logger.warn('Invalid log data:', log);
             continue;
           }
 
-          console.log(`Transferring ${value} from ${from} to ${to}`);
+          this.logger.log(
+            `Address ${address} transferring ${value} from ${from} to ${to}`,
+          );
           await this.usersService.updateUserBalance(from, BigInt(value), false);
           await this.usersService.updateUserBalance(to, BigInt(value), true);
         } catch (logError) {
-          console.error('Error processing log:', log, logError);
+          this.logger.error(
+            `Error processing log for address ${address}:`,
+            logError,
+          );
         }
       }
 
@@ -168,11 +178,11 @@ export class SyncService implements OnModuleInit {
         },
       );
 
-      console.log(
-        `Synced blocks ${fromBlock} to ${toBlock}, there are ${latestBlock - toBlock} blocks left`,
+      this.logger.log(
+        `Address ${address} synced ${logs.length} logs from block ${fromBlock} to ${toBlock}`,
       );
     } catch (error) {
-      console.error(`Sync job error for address ${address}:`, error);
+      this.logger.error(`Sync job error for address ${address}:`, error);
     }
   }
 
@@ -201,7 +211,10 @@ export class SyncService implements OnModuleInit {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      console.error(`Failed to get sync status for address ${address}:`, error);
+      this.logger.error(
+        `Failed to get sync status for address ${address}:`,
+        error,
+      );
       throw new InternalServerErrorException('Failed to retrieve sync status');
     }
   }

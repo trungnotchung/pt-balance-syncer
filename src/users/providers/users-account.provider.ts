@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Inject,
   Injectable,
+  Logger,
   forwardRef,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -15,6 +16,7 @@ import { UserAccount } from '../schemas/user-account.schema';
 
 @Injectable()
 export class UserAccountProvider {
+  private readonly logger = new Logger(UserAccountProvider.name);
   constructor(
     @InjectModel(UserAccount.name)
     private readonly userAccountModel: Model<UserAccount>,
@@ -54,7 +56,7 @@ export class UserAccountProvider {
       await newUser.save();
       return newUser;
     } catch (error) {
-      console.log(`Error creating user: ${error}`);
+      this.logger.error(`Error creating user: ${error}`);
       throw error;
     }
   }
