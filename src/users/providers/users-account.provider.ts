@@ -1,12 +1,11 @@
 import {
-  BadRequestException,
-  Inject,
+  ConflictException,
   Injectable,
+  InternalServerErrorException,
   Logger,
-  forwardRef,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, mongo } from 'mongoose';
 
 import { HashingProvider } from 'src/auth/providers/hashing.provider';
 
@@ -17,47 +16,48 @@ import { UserAccount } from '../schemas/user-account.schema';
 @Injectable()
 export class UserAccountProvider {
   private readonly logger = new Logger(UserAccountProvider.name);
+
   constructor(
     @InjectModel(UserAccount.name)
     private readonly userAccountModel: Model<UserAccount>,
-
-    @Inject(forwardRef(() => HashingProvider))
     private readonly hashingProvider: HashingProvider,
   ) {}
 
   public async findUserByUsername(
     username: string,
-  ): Promise<UserAccount | undefined> {
+  ): Promise<UserAccount | null> {
     return this.userAccountModel.findOne({ username });
   }
 
   public async createUser(createUserDto: CreateUserDto): Promise<UserAccount> {
-    try {
-      const existingUser = await this.findUserByUsername(
-        createUserDto.username,
+    const existing = await this.findUserByUsername(createUserDto.username);
+    if (existing) {
+      throw new ConflictException(
+        'Username already exists. Please choose another one.',
       );
+    }
 
-      // Handle exception
-      if (existingUser) {
-        throw new BadRequestException(
-          'The user already exists, please try another username.',
+    try {
+      const hashedPassword = await this.hashingProvider.hashPassword(
+        createUserDto.password,
+      );
+      const user = await this.userAccountModel.create({
+        username: createUserDto.username,
+        password: hashedPassword,
+        role: UserRole.USER,
+      });
+      return user;
+    } catch (err: any) {
+      if (err instanceof mongo.MongoError && err.code === 11000) {
+        throw new ConflictException(
+          'Username already exists. Please choose another one.',
         );
       }
 
-      // Create a new user
-      const newUser = await this.userAccountModel.create({
-        username: createUserDto.username,
-        password: await this.hashingProvider.hashPassword(
-          createUserDto.password,
-        ),
-        role: UserRole.USER,
-      });
-
-      await newUser.save();
-      return newUser;
-    } catch (error) {
-      this.logger.error(`Error creating user: ${error}`);
-      throw error;
+      this.logger.error('Unexpected error creating user', err.stack);
+      throw new InternalServerErrorException(
+        'Could not create user at this time.',
+      );
     }
   }
 }
