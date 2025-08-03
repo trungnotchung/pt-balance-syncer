@@ -27,42 +27,28 @@ export class SignInProvider {
     private readonly jwtService: JwtService,
   ) {}
 
-  async signIn(signInDto: SignInDto): Promise<SignInResponseDto> {
-    try {
-      const user = await this.usersService.findUserByUsername(
-        signInDto.username,
-      );
+  async signIn(dto: SignInDto): Promise<SignInResponseDto> {
+    const user = await this.usersService.findUserByUsername(dto.username);
+    if (!user) throw new UnauthorizedException('User not found');
 
-      if (!user) {
-        throw new UnauthorizedException('User not found');
-      }
+    const valid = await this.hashingProvider.comparePassword(
+      dto.password,
+      user.password,
+    );
+    if (!valid) throw new UnauthorizedException('Invalid password');
 
-      const isPasswordValid = await this.hashingProvider.comparePassword(
-        signInDto.password,
-        user.password,
-      );
+    const payload: JwtPayload = {
+      sub: user.id,
+      username: user.username,
+      role: user.role,
+    };
+    const accessToken = await this.jwtService.signAsync(payload);
 
-      if (!isPasswordValid) {
-        throw new UnauthorizedException('Invalid password');
-      }
-
-      const payload: JwtPayload = {
-        sub: user.id,
-        username: user.username,
-        role: user.role,
-      };
-
-      const accessToken = await this.jwtService.signAsync(payload);
-
-      return {
-        id: user.id,
-        username: user.username,
-        role: user.role,
-        accessToken,
-      };
-    } catch (error) {
-      this.logger.error(`Error signing in: ${error}`);
-      throw error;
-    }
+    return {
+      id: user.id,
+      username: user.username,
+      role: user.role,
+      accessToken,
+    };
   }
 }
