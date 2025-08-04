@@ -14,10 +14,12 @@ import {
 import { SyncModule } from './sync/sync.module';
 import { UsersModule } from './users/users.module';
 
+const ENV = process.env.NODE_ENV;
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: ENV ? `.env.${ENV}` : '.env',
       load: [
         appConfig,
         databaseConfig,
