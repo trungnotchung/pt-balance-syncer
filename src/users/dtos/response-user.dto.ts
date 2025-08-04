@@ -15,3 +15,17 @@ export class ResponseUserDto {
   @Transform(({ value }) => value.toString())
   balance: string;
 }
+
+export class ResponseManyUserDto {
+  @ApiProperty({
+    description: 'The total number of users',
+    example: 100,
+  })
+  total: number;
+
+  @ApiProperty({
+    description: 'The users',
+    type: [ResponseUserDto],
+  })
+  users: ResponseUserDto[];
+}

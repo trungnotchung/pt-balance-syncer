@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 
 import { CreateUserDto } from '../dtos/create-user.dto';
-import { ResponseUserDto } from '../dtos/response-user.dto';
+import {
+  ResponseManyUserDto,
+  ResponseUserDto,
+} from '../dtos/response-user.dto';
 import { UserAccount } from '../schemas/user-account.schema';
 
 import { UserAccountProvider } from './users-account.provider';
@@ -16,6 +19,13 @@ export class UsersService {
 
   async getUserBalance(userAddress: string): Promise<ResponseUserDto> {
     return this.userBalanceProvider.getUserBalance(userAddress);
+  }
+
+  async getManyUserBalance(
+    limit: number,
+    offset: number,
+  ): Promise<ResponseManyUserDto> {
+    return this.userBalanceProvider.getManyUserBalance(limit, offset);
   }
 
   async updateUserBalance(

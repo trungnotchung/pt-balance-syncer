@@ -9,7 +9,10 @@ import { Model } from 'mongoose';
 import { contractsConfig } from 'src/config';
 import { OnchainService } from 'src/onchain/onchain.service';
 
-import { ResponseUserDto } from '../dtos/response-user.dto';
+import {
+  ResponseManyUserDto,
+  ResponseUserDto,
+} from '../dtos/response-user.dto';
 import { UserBalance } from '../schemas/user-balance.schema';
 
 @Injectable()
@@ -41,6 +44,23 @@ export class UserBalanceProvider {
     );
 
     return { address: userAddress, balance: onChainBalance };
+  }
+
+  async getManyUserBalance(
+    limit: number,
+    offset: number,
+  ): Promise<ResponseManyUserDto> {
+    const [users, total] = await Promise.all([
+      this.userBalanceModel.find().skip(offset).limit(limit),
+      this.userBalanceModel.countDocuments(),
+    ]);
+    return {
+      users: users.map((user) => ({
+        address: user.address,
+        balance: user.balance,
+      })),
+      total,
+    };
   }
 
   async updateUserBalance(
