@@ -68,13 +68,20 @@ export class UserBalanceProvider {
     amount: bigint,
     isReceiver: boolean,
   ): Promise<void> {
-    const delta = isReceiver ? BigInt(amount) : -BigInt(amount);
+    const delta = isReceiver ? amount : -amount;
 
     try {
+      // Get current balance or default to 0
+      const user = await this.userBalanceModel.findOne({
+        address: userAddress,
+      });
+      const currentBalance = user ? BigInt(user.balance || '0') : 0n;
+      const newBalance = currentBalance + delta;
+
       await this.userBalanceModel.updateOne(
         { address: userAddress },
         {
-          $inc: { balance: delta.toString() },
+          $set: { balance: newBalance.toString() },
         },
         { upsert: true },
       );
