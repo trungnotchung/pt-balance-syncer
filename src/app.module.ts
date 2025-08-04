@@ -11,6 +11,7 @@ import {
   ethereumConfig,
   jwtConfig,
 } from './config';
+import { environmentValidationSchema } from './config/environment-validation';
 import { SyncModule } from './sync/sync.module';
 import { UsersModule } from './users/users.module';
 
@@ -27,6 +28,7 @@ const ENV = process.env.NODE_ENV;
         contractsConfig,
         jwtConfig,
       ],
+      validationSchema: environmentValidationSchema,
     }),
     JwtModule.registerAsync({
       global: true,
