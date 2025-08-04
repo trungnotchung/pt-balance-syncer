@@ -4,7 +4,7 @@ import { CreateUserDto } from '../dtos/create-user.dto';
 import {
   ResponseManyUserDto,
   ResponseUserDto,
-} from '../dtos/response-user.dto';
+} from '../dtos/user-response.dto';
 import { UserAccount } from '../schemas/user-account.schema';
 
 import { UserAccountProvider } from './users-account.provider';
@@ -22,10 +22,10 @@ export class UsersService {
   }
 
   async getManyUserBalance(
-    limit: number,
-    offset: number,
+    page: number,
+    perPage: number,
   ): Promise<ResponseManyUserDto> {
-    return this.userBalanceProvider.getManyUserBalance(limit, offset);
+    return this.userBalanceProvider.getManyUserBalance(page, perPage);
   }
 
   async updateUserBalance(

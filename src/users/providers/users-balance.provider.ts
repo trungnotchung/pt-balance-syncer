@@ -12,7 +12,7 @@ import { OnchainService } from 'src/onchain/onchain.service';
 import {
   ResponseManyUserDto,
   ResponseUserDto,
-} from '../dtos/response-user.dto';
+} from '../dtos/user-response.dto';
 import { UserBalance } from '../schemas/user-balance.schema';
 
 @Injectable()
@@ -47,19 +47,30 @@ export class UserBalanceProvider {
   }
 
   async getManyUserBalance(
-    limit: number,
-    offset: number,
+    page: number,
+    perPage: number,
   ): Promise<ResponseManyUserDto> {
-    const [users, total] = await Promise.all([
-      this.userBalanceModel.find().skip(offset).limit(limit),
+    const skip = (page - 1) * perPage;
+    const [records, total] = await Promise.all([
+      this.userBalanceModel
+        .find()
+        .skip(skip)
+        .limit(perPage)
+        .sort({ updatedAt: -1 })
+        .lean(),
       this.userBalanceModel.countDocuments(),
     ]);
+
+    const totalPages = Math.ceil(total / perPage);
+
     return {
-      users: users.map((user) => ({
-        address: user.address,
-        balance: user.balance,
-      })),
+      users: records.map((r) => ({ address: r.address, balance: r.balance })),
       total,
+      currentPage: page,
+      itemsPerPage: perPage,
+      totalPages,
+      previousPage: page > 1 ? page - 1 : null,
+      nextPage: page < totalPages ? page + 1 : null,
     };
   }
 

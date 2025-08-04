@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 
+import { PaginationResponseDto } from 'src/common/dtos/pagination-response.dto';
+
 export class ResponseUserDto {
   @ApiProperty({
     description: 'The address of the user',
@@ -16,13 +18,7 @@ export class ResponseUserDto {
   balance: string;
 }
 
-export class ResponseManyUserDto {
-  @ApiProperty({
-    description: 'The total number of users',
-    example: 100,
-  })
-  total: number;
-
+export class ResponseManyUserDto extends PaginationResponseDto {
   @ApiProperty({
     description: 'The users',
     type: [ResponseUserDto],
