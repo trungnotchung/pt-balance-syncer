@@ -13,6 +13,7 @@ import { AddressParamsDto } from 'src/common/dtos/address-params.dto';
 import { UserRole } from 'src/users/constants/user.constant';
 
 import { StartSyncDto } from './dtos/start-sync.dto';
+import { StopSyncDto } from './dtos/stop-sync.dto';
 import { SyncResponseDto } from './dtos/sync-response.dto';
 import { SyncService } from './sync.service';
 
@@ -46,9 +47,9 @@ export class SyncController {
     summary: 'Stop the sync event',
     description: 'Stop syncing the data from the blockchain',
   })
-  @ApiBody({ type: AddressParamsDto })
+  @ApiBody({ type: StopSyncDto })
   @Post('stop')
-  async stopSync(@Body() stopSyncDto: AddressParamsDto) {
+  async stopSync(@Body() stopSyncDto: StopSyncDto) {
     await this.syncService.stopSync(stopSyncDto.address);
     return {
       message: 'Sync stopped successfully',
